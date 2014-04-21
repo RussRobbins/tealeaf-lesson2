@@ -1,0 +1,19 @@
+Nouns:
+
+Card
+ - has suit and rank
+
+Deck
+ - has a collection of cards - for blackjack it's 52, one of each suit/rank combination
+ - has the ability to deal out a card (removing it from the deck)
+
+Participant
+ - has a name and some number of cards
+ - can determine the total value of his current hand
+
+Player < Participant
+ - has a method to ask the player if they want to hit or stay
+
+Dealer < Participant
+ - has a method to decide whether to hit or stay
+

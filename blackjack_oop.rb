@@ -53,8 +53,17 @@ class Participant
     (sum_cards(11) > 21) ? sum_cards(1) : sum_cards(11)
   end
 
+  def is_busted?
+    if (hand_value > 21)
+      puts "#{name} has busted!"
+      return true
+    else
+      return false
+    end
+  end
+
   def print_value
-    "#{name}'s hand value: #{hand_value}"
+    hand_value <= 21 ? "#{name}'s hand value: #{hand_value}" : "#{name}'s hand value: BUSTED!"
   end
 
   def hit_or_stay
@@ -91,8 +100,13 @@ class Player < Participant
     when 'h'
       new_card = deck.deal_card(self)
       puts "#{name} hits and is dealt the #{new_card}."
+      if is_busted?
+        cmd = 'b'
+      else
+        puts print_value
+      end
     when 's'
-      puts "#{name} stays."
+      puts "#{name} stays at #{hand_value}."
     else
       puts "Try again..."
       hit_or_stay deck
@@ -109,12 +123,17 @@ class Dealer < Participant
     when 1..16
       new_card = deck.deal_card(self)
       puts "#{name} hits and is dealt the #{new_card}."
-      cmd = 'h'
+      if is_busted?
+        cmd = 'b'
+      else
+        puts print_value
+        cmd = 'h'
+      end
     when 22..1000
-      puts "#{name} busted!"
+      puts "#{name} has busted!"
       cmd = 'b'
     else
-      puts "#{name} stays."
+      puts "#{name} stays at #{hand_value}."
       cmd = 's'
     end
     cmd
@@ -149,57 +168,58 @@ class Blackjack
   end
 
   def player_turn
-    puts "#{player.name}'s turn..."
+    puts "\n#{player.name}'s turn..."
     puts "#{player}"
     puts player.print_value
     cmd = ''
-    until cmd == 's'
+    until cmd == 's' || cmd == 'b'
       cmd = player.hit_or_stay deck
-      puts player.print_value
     end
+    cmd
   end
 
   def dealer_turn
-    puts "#{dealer.name}'s turn..."
+    puts "\n#{dealer.name}'s turn..."
     puts "#{dealer}"
     puts dealer.print_value
     cmd = ''
-    until cmd == 's' && cmd != 'b'
+    until cmd == 's' || cmd == 'b'
       cmd = dealer.hit_or_stay deck
-      puts dealer.print_value
+    end
+    cmd
+  end
+
+  def end_game(player_outcome, dealer_outcome)
+    p_value = player.hand_value
+    d_value = dealer.hand_value
+    if p_value == 21
+      puts "You hit BLACKJACK!"
+    elsif d_value == 21
+      puts "#{dealer.name} hit BLACKJACK!"
+    else
+      (p_value <= 21) ? (puts "\n#{player.print_value}  -  #{dealer.print_value}") : (puts '')
+    end
+    if player_outcome == 'b' || (p_value < d_value && dealer_outcome != 'b')
+      puts "Better luck next time!"
+    elsif dealer_outcome == 'b' || p_value > d_value
+      puts "Congratulations, you win!"
+    elsif p_value == d_value
+      puts "Looks like it's a draw."
     end
   end
 
   def play
     get_player_name
     deal_cards
-    player_turn
-    dealer_turn
+    p = player_turn
+    if p != 'b' && player.hand_value != 21
+      d = dealer_turn
+    end
+    end_game(p,d)
   end
-
 end
 
 game = Blackjack.new
 game.play
 
 
-# TEST CODE
-# new_deck = Deck.new
-# player = Player.new("Russ")
-# dealer = Dealer.new("Sammy")
-# 2.times do
-#   new_deck.deal_card(player)
-#   new_deck.deal_card(dealer)
-# end
-
-# puts "#{player}"
-# puts player.print_value
-# player.hit_or_stay new_deck
-# puts "#{player}"
-# puts player.print_value
-# puts ''
-# puts "#{dealer}"
-# puts dealer.print_value
-# dealer.hit_or_stay new_deck
-# puts "#{dealer}"
-# puts dealer.print_value
